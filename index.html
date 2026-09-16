@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101828">
+<meta name="description" content="Offline-first interior measurement and estimation toolkit by Vivek Narkhede">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Interior Smart Measure v4</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--text:#101828;--muted:#667085;--line:#e4e7ec;--soft:#f2f4f7;--dark:#101828;--accent:#175cd3;--ok:#067647;--danger:#b42318}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.app{max-width:700px;margin:auto;padding:12px 13px calc(28px + env(safe-area-inset-bottom))}
+header{padding:8px 3px 12px}.brandline{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}h1{margin:0;font-size:25px;letter-spacing:-.7px}header p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.status{font-size:10px;font-weight:850;border-radius:999px;padding:7px 9px;background:#ecfdf3;color:var(--ok);white-space:nowrap}.status.offline{background:#fff7ed;color:#b54708}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:3px 0 10px}.nav button{border:0;background:var(--soft);border-radius:13px;padding:10px 4px;font-size:12px;font-weight:850;color:#475467}.nav button.active{background:var(--dark);color:#fff}
+.page{display:none}.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:21px;padding:15px;margin:9px 0;box-shadow:0 6px 20px #1018280a}.title{font-size:17px;font-weight:900}.hint{font-size:12px;color:var(--muted);margin-top:2px}
+label{display:block;font-size:12px;font-weight:800;color:#475467;margin:11px 0 6px}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--text);padding:12px 13px;font-size:16px;outline:none}input,select{height:51px}textarea{min-height:84px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:#98a2b3;box-shadow:0 0 0 3px #175cd318}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid3{display:grid;grid-template-columns:1fr 54px 1fr;gap:8px;align-items:end}
+.swap{height:51px;border:0;border-radius:14px;background:var(--soft);font-size:20px;font-weight:900}
+.result{background:#f8fafc;border:1px solid #eef2f6;border-radius:16px;padding:14px;margin-top:12px}.big{font-size:26px;font-weight:950;letter-spacing:-.5px}.sub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.45}
+.primary{width:100%;border:0;background:var(--dark);color:#fff;min-height:51px;border-radius:14px;font-weight:900;margin-top:11px}.secondary{width:100%;border:0;background:var(--soft);color:var(--text);min-height:47px;border-radius:14px;font-weight:850}
+.rowbtn{display:flex;gap:8px;margin-top:9px}.rowbtn>*{flex:1}.btn{border:0;background:var(--soft);border-radius:13px;padding:12px 9px;font-weight:850}
+.chips{display:flex;gap:7px;overflow:auto;margin:11px 0 2px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 12px;white-space:nowrap;font-size:12px;font-weight:850}
+.metricgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.metric{background:var(--soft);border-radius:14px;padding:11px}.metric b{display:block;font-size:17px}.metric span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.quickgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}.quick{border:1px solid var(--line);background:#fff;border-radius:15px;padding:13px;text-align:left}.quick b{display:block;font-size:14px}.quick span{font-size:11px;color:var(--muted)}
+.list{display:grid;gap:8px;margin-top:11px}.item{border:1px solid var(--line);border-radius:15px;padding:12px;background:#fff}.itemtop{display:flex;justify-content:space-between;gap:8px}.item b{font-size:14px}.item small{color:var(--muted);font-size:11px}.item .actions{display:flex;gap:7px;margin-top:9px}.item button{border:0;background:var(--soft);border-radius:10px;padding:8px 10px;font-size:11px;font-weight:800}
+.refgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}.ref{background:var(--soft);border-radius:13px;padding:11px;font-size:12px}.ref b{display:block;font-size:15px;margin-bottom:2px}
+.formula{margin-top:9px;padding:10px;border-radius:11px;background:var(--soft);font:11px ui-monospace,SFMono-Regular,Menlo,monospace;color:#475467}
+.small{font-size:11px;color:var(--muted);line-height:1.45;margin-top:9px}
+.hidden{display:none!important}.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:#101828;color:#fff;padding:11px 15px;border-radius:999px;font-size:12px;font-weight:800;opacity:0;pointer-events:none;transition:.2s;z-index:30}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:16px 0 4px}
+@media(max-width:360px){.app{padding-left:9px;padding-right:9px}.nav button{font-size:11px}.grid3{grid-template-columns:1fr 46px 1fr}}
+
+.eyebrow{font-size:9px;font-weight:900;letter-spacing:1.25px;color:var(--muted);margin-bottom:2px}
+.creator{display:inline-block;margin-top:7px;padding:5px 8px;border-radius:8px;background:var(--soft);color:#475467;font-size:10px;font-weight:700}
+.creator strong{color:var(--text)}
+.nav{position:sticky;top:0;z-index:10;padding:5px 0 9px;background:linear-gradient(var(--bg) 72%,transparent);backdrop-filter:blur(8px)}
+.card{transition:transform .15s ease,box-shadow .15s ease}
+.quickgrid .quick{min-height:70px}
+.quick:active,.btn:active,.primary:active,.secondary:active,.chip:active,.nav button:active{transform:scale(.98)}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
+
+</head>
+<body>
+<div class="app">
+<header>
+<div class="brandline">
+  <div>
+    <div class="eyebrow">INTERIOR TOOLKIT</div>
+    <h1>Smart Measure</h1>
+    <p>Measure • Convert • Estimate</p>
+    <div class="creator">Created by <strong>Vivek Narkhede</strong></div>
+  </div>
+  <div id="status" class="status">● Offline Ready</div>
+</div>
+</header>
+
+<nav class="nav">
+<button class="active" data-page="home">Measure</button>
+<button data-page="convert">Convert</button>
+<button data-page="cost">Labour</button>
+<button data-page="saved">Site Book</button>
+</nav>
+
+<main>
+<section id="home" class="page active">
+<div class="card">
+<div class="title">Quick Measure</div><div class="hint">Enter site dimensions once. Get area, perimeter and wall area.</div>
+<label>Room / item name</label><input id="qname" placeholder="e.g. Living Room">
+<div class="grid2"><div><label>Length</label><input id="ql" type="text" inputmode="decimal" placeholder="10"></div><div><label>Width</label><input id="qw" type="text" inputmode="decimal" placeholder="12"></div></div>
+<label>Wall height <span style="font-weight:500">(optional)</span></label><input id="qh" type="text" inputmode="decimal" placeholder="10">
+<label>Unit</label><select id="qu"><option value="ft">Feet</option><option value="m">Meter</option><option value="cm">Centimetre</option></select>
+<button class="primary" id="qcalc">Calculate</button>
+<div class="result"><div class="big" id="qarea">—</div><div class="sub" id="qsub">Enter length and width</div></div>
+<div class="metricgrid"><div class="metric"><b id="qper">—</b><span>Perimeter</span></div><div class="metric"><b id="qwall">—</b><span>4-wall area</span></div></div>
+<div class="rowbtn"><button class="btn" id="qsave">Save Measurement</button><button class="btn" id="qclear">Clear</button></div>
+<div class="small">For wall area, enter wall height. Save measurements locally on this device.</div>
+</div>
+
+<div class="quickgrid">
+<button class="quick" data-go="convert"><b>📏 Converter</b><span>cm, mm, m, inch, ft</span></button>
+<button class="quick" data-go="cost"><b>👷 Labour Cost</b><span>Area × ₹/sq.ft</span></button>
+<button class="quick data" data-go="saved"><b>📋 Site Book</b><span>Saved rooms & measurements</span></button>
+<button class="quick" data-go="ref"><b>🔢 Quick Reference</b><span>Common interior values</span></button>
+</div>
+</section>
+
+<section id="convert" class="page">
+<div class="card">
+<div class="title">Smart Converter</div><div class="hint">Supports common interior measurement units.</div>
+<div class="grid3"><div><label>Value</label><input id="cv" type="number" step="any" inputmode="decimal" placeholder="285"></div><button class="swap" id="swap">⇄</button><div><label>From</label><select id="cf"></select></div></div>
+<label>Convert to</label><select id="ct"></select>
+<div class="result"><div class="big" id="co">—</div><div class="sub" id="cs">Enter a value</div></div>
+<div class="chips"><button class="chip" data-preset="cm,ft">cm → ft</button><button class="chip" data-preset="ft,cm">ft → cm</button><button class="chip" data-preset="in,ft">inch → ft</button><button class="chip" data-preset="ft,in">ft → inch</button><button class="chip" data-preset="m,ft">m → ft</button></div>
+<div class="rowbtn"><button class="btn" id="copy">Copy Result</button><button class="btn" id="cclear">Clear</button></div>
+</div>
+<div class="card"><div class="title">Feet + Inch Helper</div><div class="hint">Useful for carpentry/site measurements.</div>
+<div class="grid2"><div><label>Feet</label><input id="fiFt" type="number" step="1" inputmode="numeric" placeholder="9"></div><div><label>Inches</label><input id="fiIn" type="number" step="any" inputmode="decimal" placeholder="5"></div></div>
+<div class="result"><div class="big" id="fiOut">—</div><div class="sub" id="fiSub">Enter feet and inches</div></div>
+</div>
+</section>
+
+<section id="cost" class="page">
+<div class="card">
+<div class="title">Labour Cost</div><div class="hint">Area-based labour: billable sq.ft × ₹/sq.ft.</div>
+<div class="grid2"><div><label>Length</label><input id="ll" type="number" step="any" inputmode="decimal" placeholder="10"></div><div><label>Width</label><input id="lw" type="number" step="any" inputmode="decimal" placeholder="12"></div></div>
+<label>Unit</label><select id="lu"><option value="ft">Feet</option><option value="m">Meter</option><option value="cm">Centimetre</option></select>
+<label>Labour rate (₹ / sq.ft)</label><input id="lr" type="number" step="any" inputmode="decimal" placeholder="150">
+<label>Extra / billable area % <span style="font-weight:500">(optional)</span></label><input id="lextra" type="number" step="any" inputmode="decimal" value="0">
+<div class="chips"><button class="chip" data-rate="75">₹75</button><button class="chip" data-rate="100">₹100</button><button class="chip" data-rate="125">₹125</button><button class="chip" data-rate="150">₹150</button><button class="chip" data-rate="200">₹200</button></div>
+<button class="primary" id="lcalc">Calculate Labour</button>
+<div class="result"><div class="big" id="lout">₹ —</div><div class="sub" id="lsub">Enter dimensions and labour rate</div></div>
+<div class="metricgrid"><div class="metric"><b id="lbase">—</b><span>Base area</span></div><div class="metric"><b id="lbill">—</b><span>Billable area</span></div></div>
+<div class="metricgrid"><div class="metric"><b id="lrate">—</b><span>Rate</span></div><div class="metric"><b id="lcalcshow">—</b><span>Calculation</span></div></div>
+<div class="small">This is for area-based labour. Some interior work is charged by running foot, piece, day or lump sum and should be calculated separately.</div>
+</div>
+</section>
+
+<section id="saved" class="page">
+<div class="card">
+<div class="title">Site Book</div><div class="hint">Your measurements stay on this device. No account or internet is required.</div>
+<div class="rowbtn"><button class="btn" id="export">Export Backup</button><button class="btn" id="clearSaved">Delete All</button></div>
+<div id="savedList" class="list"></div>
+</div>
+</section>
+
+<section id="ref" class="page">
+<div class="card">
+<div class="title">Quick Reference</div><div class="hint">Common interior measurement constants.</div>
+<div class="refgrid">
+<div class="ref"><b>1 ft</b>30.48 cm</div><div class="ref"><b>1 inch</b>2.54 cm</div><div class="ref"><b>1 ft</b>12 inch</div><div class="ref"><b>1 m</b>3.28084 ft</div>
+<div class="ref"><b>1 m</b>100 cm</div><div class="ref"><b>1 sq ft</b>0.09290304 sq m</div><div class="ref"><b>1 sq m</b>10.7639 sq ft</div><div class="ref"><b>8 × 4 ft</b>32 sq ft sheet</div>
+</div>
+<div class="formula">285 cm ≈ 9.35 ft ≈ 9' 4.2" • 7.5 ft = 7' 6"</div>
+</div>
+</section>
+</main>
+
+<footer>Smart Measure v4.0 • Created by <strong>Vivek Narkhede</strong> • Offline First</footer>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+'use strict';
+const U={mm:1,cm:10,m:1000,in:25.4,ft:304.8}, N={mm:'mm',cm:'cm',m:'m',in:'inch',ft:'ft'};
+const $=id=>document.getElementById(id);
+const fmt=n=>Number.isFinite(n)?Number(n.toFixed(4)).toLocaleString('en-IN',{maximumFractionDigits:4}):'—';
+const rupee=n=>Number.isFinite(n)?'₹ '+Number(n.toFixed(2)).toLocaleString('en-IN',{maximumFractionDigits:2}):'₹ —';
+const factorArea=u=>u==='ft'?1:u==='m'?10.7639104167:.00107639104167;
+const toFt=(v,u)=>v*(u==='ft'?1:u==='m'?3.280839895:.03280839895);
+const showToast=t=>{const x=$('toast');x.textContent=t;x.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>x.classList.remove('show'),1400)};
+
+['mm','cm','m','in','ft'].forEach(u=>{$('cf').add(new Option(N[u],u));$('ct').add(new Option(N[u],u))});
+$('cf').value='cm';$('ct').value='ft';
+
+function convert(){const v=parseFloat($('cv').value);if(!Number.isFinite(v)){$('co').textContent='—';$('cs').textContent='Enter a value';return}const r=v*U[$('cf').value]/U[$('ct').value];$('co').textContent=fmt(r)+' '+N[$('ct').value];$('cs').textContent=fmt(v)+' '+N[$('cf').value]+' = '+fmt(r)+' '+N[$('ct').value]}
+['cv','cf','ct'].forEach(id=>$(id).addEventListener('input',convert));$('swap').onclick=()=>{const x=$('cf').value;$('cf').value=$('ct').value;$('ct').value=x;convert()};
+document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{const [a,c]=b.dataset.preset.split(',');$('cf').value=a;$('ct').value=c;convert();$('cv').focus()});
+$('copy').onclick=async()=>{if($('co').textContent==='—')return;try{await navigator.clipboard.writeText($('co').textContent);showToast('Result copied')}catch(e){showToast('Copy unavailable')}}
+$('cclear').onclick=()=>{$('cv').value='';convert()};
+function feetHelper(){const f=parseFloat($('fiFt').value)||0,i=parseFloat($('fiIn').value)||0;if(!Number.isFinite(f)||!Number.isFinite(i))return;$('fiOut').textContent=fmt(f+i/12)+' ft';$('fiSub').textContent=fmt((f+i/12)*30.48)+' cm • '+fmt(f*12+i)+' inch'}
+['fiFt','fiIn'].forEach(id=>$(id).addEventListener('input',feetHelper));
+
+function quickCalc(){
+ const x=parseFloat($('ql').value),y=parseFloat($('qw').value),h=parseFloat($('qh').value),u=$('qu').value;
+ if(!Number.isFinite(x)||!Number.isFinite(y)||x<0||y<0){$('qarea').textContent='—';$('qsub').textContent='Enter valid length and width';return null}
+ const xf=toFt(x,u),yf=toFt(y,u),floor=xf*yf,per=2*(xf+yf),wall=Number.isFinite(h)&&h>=0?per*toFt(h,u):NaN;
+ $('qarea').textContent=fmt(floor)+' sq.ft';$('qsub').textContent='≈ '+fmt(floor/10.7639104167)+' sq.m';
+ $('qper').textContent=fmt(per)+' ft';$('qwall').textContent=Number.isFinite(wall)?fmt(wall)+' sq.ft':'—';
+ return {x,y,h,u,floor,per,wall,name:$('qname').value.trim()||'Untitled'};
+}
+$('qcalc').onclick=()=>{quickCalc();showToast('Calculated')};
+['qname','ql','qw','qh','qu'].forEach(id=>$(id).addEventListener('input',quickCalc));
+$('qclear').onclick=()=>{['qname','ql','qw','qh'].forEach(id=>$(id).value='');$('qarea').textContent='—';$('qsub').textContent='Enter length and width';$('qper').textContent='—';$('qwall').textContent='—'};
+
+function getSaved(){try{return JSON.parse(localStorage.getItem('ism_v4_saved')||'[]')}catch(e){return[]}}
+function setSaved(a){localStorage.setItem('ism_v4_saved',JSON.stringify(a))}
+$('qsave').onclick=()=>{const d=quickCalc();if(!d)return;const a=getSaved();a.unshift({id:Date.now(),date:new Date().toLocaleString('en-IN'),...d});setSaved(a);renderSaved();showToast('Measurement saved')};
+
+function renderSaved(){const list=$('savedList'),a=getSaved();if(!a.length){list.innerHTML='<div class="small">No saved measurements yet.</div>';return}list.innerHTML='';a.slice(0,100).forEach(d=>{const el=document.createElement('div');el.className='item';el.innerHTML='<div class="itemtop"><b></b><small></small></div><div class="small"></div><div class="actions"><button type="button" data-load>Load</button><button type="button" data-delete>Delete</button></div>';el.querySelector('b').textContent=d.name;el.querySelector('small').textContent=d.date;el.querySelector('.small').textContent=fmt(d.x)+' × '+fmt(d.y)+' '+d.u+' • '+fmt(d.floor)+' sq.ft'+(Number.isFinite(d.wall)?' • Walls '+fmt(d.wall)+' sq.ft':'');el.querySelector('[data-load]').onclick=()=>{go('home');$('qname').value=d.name;$('ql').value=d.x;$('qw').value=d.y;$('qh').value=Number.isFinite(d.h)?d.h:'';$('qu').value=d.u;quickCalc()};el.querySelector('[data-delete]').onclick=()=>{setSaved(getSaved().filter(x=>x.id!==d.id));renderSaved();showToast('Deleted')};list.appendChild(el)})}
+$('clearSaved').onclick=()=>{if(getSaved().length&&!confirm('Delete all saved measurements?'))return;localStorage.removeItem('ism_v4_saved');renderSaved();showToast('Saved measurements cleared')};
+$('export').onclick=()=>{const data=JSON.stringify({app:'Interior Smart Measure',version:'4.0',exported:new Date().toISOString(),measurements:getSaved()},null,2);const blob=new Blob([data],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='interior-smart-measure-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Backup exported')};
+
+function labourCalc(){const x=parseFloat($('ll').value),y=parseFloat($('lw').value),r=parseFloat($('lr').value),extra=Math.max(0,parseFloat($('lextra').value)||0);if(!Number.isFinite(x)||!Number.isFinite(y)||!Number.isFinite(r)||x<0||y<0||r<0){$('lout').textContent='₹ —';$('lsub').textContent='Enter valid dimensions and rate';return}const base=x*y*factorArea($('lu').value),bill=base*(1+extra/100),total=bill*r;$('lout').textContent=rupee(total);$('lsub').textContent=fmt(bill)+' sq.ft × ₹'+fmt(r)+'/sq.ft';$('lbase').textContent=fmt(base)+' sq.ft';$('lbill').textContent=fmt(bill)+' sq.ft';$('lrate').textContent='₹'+fmt(r);$('lcalcshow').textContent=rupee(total)}
+$('lcalc').onclick=()=>{labourCalc();showToast('Labour calculated')};['ll','lw','lr','lextra','lu'].forEach(id=>$(id).addEventListener('input',labourCalc));document.querySelectorAll('[data-rate]').forEach(b=>b.onclick=()=>{$('lr').value=b.dataset.rate;labourCalc()});
+
+function go(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'});if(id==='saved')renderSaved()}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go==='ref'?'ref':b.dataset.go));
+
+$('status').textContent=navigator.onLine?'● Online • Offline Ready':'● Offline Mode';
+window.addEventListener('online',()=>{$('status').textContent='● Online • Offline Ready';$('status').classList.remove('offline')});
+window.addEventListener('offline',()=>{$('status').textContent='● Offline Mode';$('status').classList.add('offline')});
+
+renderSaved();convert();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
