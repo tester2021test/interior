@@ -1,0 +1,12 @@
+{
+  "name": "Smart Measure",
+  "short_name": "Smart Measure",
+  "description": "Measure \u2022 Convert \u2022 Estimate \u2014 offline-first interior toolkit.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f7fb",
+  "theme_color": "#111827",
+  "orientation": "portrait-primary",
+  "icons": []
+}
