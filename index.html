@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<meta name="description" content="Offline interior measurement and conversion toolkit by Vivek Narkhede">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Interior Smart Measure</title>
+<style>
+:root{--bg:#f3f5f7;--card:#fff;--text:#101828;--muted:#667085;--line:#e4e7ec;--dark:#101828;--soft:#f2f4f7;--accent:#175cd3;--ok:#067647}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}
+.app{max-width:680px;margin:auto;padding:12px 13px calc(28px + env(safe-area-inset-bottom))}
+header{padding:9px 3px 12px}h1{margin:0;font-size:25px;letter-spacing:-.7px}header p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.tabs{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 8px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:var(--soft);color:#475467;padding:10px 14px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap}.tab.active{background:var(--dark);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:21px;padding:15px;margin:9px 0;box-shadow:0 6px 20px #1018280a}
+.title{font-size:17px;font-weight:850}.hint{font-size:12px;color:var(--muted);margin-top:2px}
+label{display:block;font-size:12px;font-weight:800;color:#475467;margin:11px 0 6px}
+input,select{width:100%;height:51px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--text);padding:0 13px;font-size:17px;outline:none}input:focus,select:focus{border-color:#98a2b3;box-shadow:0 0 0 3px #175cd318}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid3{display:grid;grid-template-columns:1fr 54px 1fr;gap:8px;align-items:end}
+.swap{height:51px;border:0;border-radius:14px;background:var(--soft);font-size:20px;font-weight:800}
+.result{background:#f8fafc;border:1px solid #eef2f6;border-radius:16px;padding:14px;margin-top:12px}.big{font-size:25px;font-weight:900;letter-spacing:-.5px}.sub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+.rowbtn{display:flex;gap:8px;margin-top:9px}.btn{flex:1;border:0;background:var(--soft);border-radius:13px;padding:12px 9px;font-weight:800}.primary{width:100%;border:0;background:var(--dark);color:#fff;height:51px;border-radius:14px;font-weight:850;margin-top:11px}
+.chips{display:flex;gap:7px;overflow:auto;margin:11px 0 2px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 12px;white-space:nowrap;font-size:12px;font-weight:800}
+.metricgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.metric{background:var(--soft);border-radius:14px;padding:11px}.metric b{display:block;font-size:17px}.metric span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.refgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}.ref{background:var(--soft);border-radius:13px;padding:11px;font-size:12px}.ref b{display:block;font-size:15px;margin-bottom:2px}
+.formula{margin-top:9px;padding:10px;border-radius:11px;background:var(--soft);font:11px ui-monospace,SFMono-Regular,Menlo,monospace;color:#475467}
+.small{font-size:11px;color:var(--muted);line-height:1.45;margin-top:9px}
+.hidden{display:none!important}footer{text-align:center;color:var(--muted);font-size:11px;padding:15px 0 3px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:#101828;color:#fff;padding:11px 15px;border-radius:999px;font-size:12px;font-weight:750;opacity:0;pointer-events:none;transition:.2s;z-index:20}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:370px){.app{padding-left:9px;padding-right:9px}.card{padding:13px}.grid3{grid-template-columns:1fr 46px 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<h1>Interior Smart Measure</h1>
+<p>Fast • offline • site-ready • Created by <b>Vivek Narkhede</b></p>
+</header>
+
+<nav class="tabs">
+<button class="tab active" data-tab="convert">Convert</button>
+<button class="tab" data-tab="area">Area</button>
+<button class="tab" data-tab="room">Room</button>
+<button class="tab" data-tab="smart">Smart Tools</button>
+<button class="tab" data-tab="ref">Quick Ref</button>
+</nav>
+
+<section id="convert" class="card">
+<div class="title">Smart Unit Converter</div><div class="hint">Enter any measurement. Results update instantly.</div>
+<div class="grid3">
+<div><label>Value</label><input id="cv" type="number" step="any" inputmode="decimal" placeholder="e.g. 285"></div>
+<button class="swap" id="swap">⇄</button>
+<div><label>From</label><select id="cf"></select></div>
+</div>
+<label>Convert to</label><select id="ct"></select>
+<div class="result"><div class="big" id="co">—</div><div class="sub" id="cs">Enter a value</div></div>
+<div class="chips">
+<button class="chip" data-preset="cm,ft">cm → ft</button><button class="chip" data-preset="ft,cm">ft → cm</button>
+<button class="chip" data-preset="in,ft">inch → ft</button><button class="chip" data-preset="ft,in">ft → inch</button>
+<button class="chip" data-preset="m,ft">m → ft</button><button class="chip" data-preset="ft,m">ft → m</button>
+</div>
+<div class="rowbtn"><button class="btn" id="copy">Copy</button><button class="btn" id="clear">Clear</button></div>
+</section>
+
+<section id="area" class="card hidden">
+<div class="title">Area Calculator</div><div class="hint">Floor, ceiling, wall, panel and furniture estimation.</div>
+<label>Measurement unit</label><select id="au"><option value="ft">feet</option><option value="m">meter</option><option value="cm">cm</option></select>
+<div class="grid2"><div><label>Length</label><input id="ax" type="number" step="any" inputmode="decimal"></div><div><label>Width</label><input id="ay" type="number" step="any" inputmode="decimal"></div></div>
+<label>Wastage %</label><input id="awaste" type="number" step="any" inputmode="decimal" value="0">
+<button class="primary" id="acalc">Calculate Area</button>
+<div class="result"><div class="big" id="ao">—</div><div class="sub" id="as">Enter length and width</div></div>
+<div class="metricgrid"><div class="metric"><b id="abase">—</b><span>Base area</span></div><div class="metric"><b id="afinal">—</b><span>With billable area</span></div></div>
+<div class="metricgrid">
+<div class="metric"><b id="alrate">—</b><span>Labour rate</span></div>
+<div class="metric"><b id="alcost">—</b><span>Labour cost</span></div>
+</div>
+<label>Optional labour rate (₹ / sq.ft)</label>
+<input id="arate" type="number" step="any" inputmode="decimal" placeholder="e.g. 150">
+</section>
+
+<section id="room" class="card hidden">
+<div class="title">Room Calculator</div><div class="hint">Floor area + four-wall area + perimeter.</div>
+<label>Unit</label><select id="ru"><option value="ft">feet</option><option value="m">meter</option></select>
+<div class="grid2"><div><label>Length</label><input id="rx" type="number" step="any" inputmode="decimal"></div><div><label>Width</label><input id="ry" type="number" step="any" inputmode="decimal"></div></div>
+<label>Wall height</label><input id="rh" type="number" step="any" inputmode="decimal">
+<button class="primary" id="rcalc">Calculate Room</button>
+<div class="result"><div class="big" id="ro">—</div><div class="sub" id="rs">Enter all three measurements</div></div>
+<div class="metricgrid"><div class="metric"><b id="rwall">—</b><span>4-wall area</span></div><div class="metric"><b id="rper">—</b><span>Perimeter</span></div></div>
+<label>Optional labour rate (₹ / sq.ft)</label>
+<input id="rrate" type="number" step="any" inputmode="decimal" placeholder="e.g. 150">
+<div class="metricgrid"><div class="metric"><b id="rcost">—</b><span>Labour cost</span></div><div class="metric"><b id="rrateout">—</b><span>Labour rate</span></div></div>
+
+<div class="formula">Floor = L × W • Walls = 2(L + W) × H • Perimeter = 2(L + W)</div>
+</section>
+
+<section id="smart" class="card hidden">
+<div class="title">Smart Interior Tools</div><div class="hint">Common site calculations in a few taps.</div>
+<div class="chips">
+<button class="chip" data-smart="skirting">Skirting</button><button class="chip" data-smart="wardrobe">Wardrobe</button>
+<button class="chip" data-smart="platform">Platform</button><button class="chip" data-smart="ceiling">False Ceiling</button>
+<button class="chip" data-smart="panel">Panel</button>
+</div>
+<div id="smartName" class="small"><b>Skirting</b> — running length × height</div>
+<label>Unit</label><select id="su"><option value="ft">feet</option><option value="m">meter</option><option value="cm">cm</option></select>
+<div class="grid2"><div><label id="sl1">Running length</label><input id="sx" type="number" step="any" inputmode="decimal"></div><div><label id="sl2">Height</label><input id="sy" type="number" step="any" inputmode="decimal"></div></div>
+<label>Wastage %</label><input id="sw" type="number" step="any" inputmode="decimal" value="10">
+<button class="primary" id="scalc">Calculate</button>
+<div class="result"><div class="big" id="so">—</div><div class="sub" id="ss">Choose a tool and enter measurements</div></div>
+<div class="metricgrid"><div class="metric"><b id="sbase">—</b><span>Base quantity</span></div><div class="metric"><b id="sfinal">—</b><span>With billable area</span></div></div>
+<label>Optional labour rate (₹ / sq.ft)</label>
+<input id="srate" type="number" step="any" inputmode="decimal" placeholder="e.g. 150">
+<div class="metricgrid"><div class="metric"><b id="scost">—</b><span>Labour cost</span></div><div class="metric"><b id="srateout">—</b><span>Labour rate</span></div></div>
+</section>
+
+
+<section id="labour" class="card hidden">
+<div class="title">Labour Cost Calculator</div>
+<div class="hint">Calculate area-based interior labour from sq.ft × ₹/sq.ft.</div>
+
+<label>Measurement unit</label>
+<select id="lu"><option value="ft">feet</option><option value="m">meter</option><option value="cm">cm</option></select>
+
+<div class="grid2">
+<div><label>Length</label><input id="lx" type="number" step="any" inputmode="decimal" placeholder="e.g. 10"></div>
+<div><label>Width</label><input id="ly" type="number" step="any" inputmode="decimal" placeholder="e.g. 12"></div>
+</div>
+
+<label>Labour rate <span style="font-weight:500">(₹ / sq.ft)</span></label>
+<input id="lr" type="number" step="any" inputmode="decimal" placeholder="e.g. 150">
+
+<label>Extra / billable area % <span style="font-weight:500">(optional)</span></label>
+<input id="lw" type="number" step="any" inputmode="decimal" value="0">
+
+<button class="primary" id="lcalc">Calculate Labour Cost</button>
+
+<div class="result">
+<div class="big" id="lout">₹ —</div>
+<div class="sub" id="lsub">Enter length, width and labour rate</div>
+</div>
+
+<div class="metricgrid">
+<div class="metric"><b id="lbase">—</b><span>Base area</span></div>
+<div class="metric"><b id="lfinal">—</b><span>Billable area</span></div>
+</div>
+<div class="metricgrid">
+<div class="metric"><b id="lrate">—</b><span>Labour rate</span></div>
+<div class="metric"><b id="lformula">—</b><span>Calculation</span></div>
+</div>
+
+<div class="chips">
+<button class="chip" data-lrate="75">₹75</button>
+<button class="chip" data-lrate="100">₹100</button>
+<button class="chip" data-lrate="125">₹125</button>
+<button class="chip" data-lrate="150">₹150</button>
+<button class="chip" data-lrate="200">₹200</button>
+</div>
+<div class="small">Example: 10 × 12 ft = 120 sq.ft. At ₹150/sq.ft → ₹18,000 labour. Use extra/billable area only when applicable to your measurement method.</div>
+</section>
+<section id="ref" class="card hidden">
+<div class="title">Interior Quick Reference</div><div class="hint">Useful values for everyday site work.</div>
+<div class="refgrid">
+<div class="ref"><b>1 ft</b>30.48 cm</div><div class="ref"><b>1 inch</b>2.54 cm</div>
+<div class="ref"><b>1 ft</b>12 inch</div><div class="ref"><b>1 m</b>3.28084 ft</div>
+<div class="ref"><b>1 m</b>100 cm</div><div class="ref"><b>1 sq ft</b>0.092903 sq m</div>
+<div class="ref"><b>1 sq m</b>10.7639 sq ft</div><div class="ref"><b>8 × 4 ft</b>32 sq ft sheet</div>
+</div>
+<div class="formula">Tip: 285 cm = 9.35 ft = 9 ft 4.2 in • 7.5 ft = 7 ft 6 in</div>
+<div class="small">For actual fabrication/ordering, verify site dimensions and vendor measurement conventions.</div>
+</section>
+
+<footer>Interior Smart Measure v3.0 • Created by <strong>Vivek Narkhede</strong></footer>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+'use strict';
+const U={mm:1,cm:10,m:1000,in:25.4,ft:304.8};
+const N={mm:'mm',cm:'cm',m:'m',in:'inch',ft:'ft'};
+const $=id=>document.getElementById(id);
+const fmt=n=>{if(!Number.isFinite(n))return '—';return Number(n.toFixed(4)).toLocaleString('en-IN',{maximumFractionDigits:4})};
+const feetInches=ft=>{let a=Math.abs(ft),f=Math.floor(a),i=Math.round((a-f)*12);if(i===12){f++;i=0}return (ft<0?'-':'')+f+"' "+i+'"'};
+
+['mm','cm','m','in','ft'].forEach(u=>{$('cf').add(new Option(N[u],u));$('ct').add(new Option(N[u],u))});
+$('cf').value='cm';$('ct').value='ft';
+
+function convert(){
+ const v=parseFloat($('cv').value); if(!Number.isFinite(v)){$('co').textContent='—';$('cs').textContent='Enter a value';return}
+ const r=v*U[$('cf').value]/U[$('ct').value];
+ $('co').textContent=fmt(r)+' '+N[$('ct').value];
+ $('cs').textContent=fmt(v)+' '+N[$('cf').value]+' = '+fmt(r)+' '+N[$('ct').value];
+}
+$('cv').addEventListener('input',convert);$('cf').addEventListener('change',convert);$('ct').addEventListener('change',convert);
+$('swap').onclick=()=>{let x=$('cf').value;$('cf').value=$('ct').value;$('ct').value=x;convert()};
+document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{let [a,c]=b.dataset.preset.split(',');$('cf').value=a;$('ct').value=c;convert();$('cv').focus()});
+function toast(t){$('toast').textContent=t;$('toast').classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>$('toast').classList.remove('show'),1300)}
+$('copy').onclick=async()=>{if($('co').textContent==='—')return;try{await navigator.clipboard.writeText($('co').textContent);toast('Result copied')}catch(e){toast('Copy not available')}};
+$('clear').onclick=()=>{$('cv').value='';convert();};
+
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));$(b.dataset.tab).classList.remove('hidden');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');localStorage.setItem('ism_tab',b.dataset.tab)});
+
+function areaFactor(u){return u==='ft'?1:u==='m'?10.7639104167:.00107639104167}
+function calcArea(){
+ let x=parseFloat($('ax').value),y=parseFloat($('ay').value),w=Math.max(0,parseFloat($('awaste').value)||0),rate=parseFloat($('arate').value);
+ if(!Number.isFinite(x)||!Number.isFinite(y)||x<0||y<0){$('ao').textContent='—';$('as').textContent='Enter length and width';return}
+ let a=x*y*areaFactor($('au').value),f=a*(1+w/100);
+ $('ao').textContent=fmt(f)+' sq ft';$('as').textContent='≈ '+fmt(f/10.7639104167)+' sq m';
+ $('abase').textContent=fmt(a)+' sq ft';$('afinal').textContent=fmt(f)+' sq ft';
+ if(Number.isFinite(rate)&&rate>=0){$('alrate').textContent='₹'+fmt(rate)+'/sq.ft';$('alcost').textContent='₹'+fmt(f*rate)}else{$('alrate').textContent='—';$('alcost').textContent='—'}
+}
+$('acalc').onclick=calcArea;
+['ax','ay','awaste','arate','au'].forEach(id=>$(id).addEventListener('input',calcArea));
+
+function calcRoom(){
+ let x=parseFloat($('rx').value),y=parseFloat($('ry').value),h=parseFloat($('rh').value),rate=parseFloat($('rrate').value);
+ if([x,y,h].some(v=>!Number.isFinite(v))){$('ro').textContent='—';$('rs').textContent='Enter all three measurements';return}
+ let f=$('ru').value==='ft'?1:3.280839895,xf=x*f,yf=y*f,hf=h*f,floor=xf*yf,wall=2*(xf+yf)*hf,per=2*(xf+yf);
+ $('ro').textContent=fmt(floor)+' sq ft';$('rs').textContent='Floor area ≈ '+fmt(floor/10.7639104167)+' sq m';
+ $('rwall').textContent=fmt(wall)+' sq ft';$('rper').textContent=fmt(per)+' ft';
+ if(Number.isFinite(rate)&&rate>=0){$('rcost').textContent='₹'+fmt(floor*rate);$('rrateout').textContent='₹'+fmt(rate)+'/sq.ft'}else{$('rcost').textContent='—';$('rrateout').textContent='—'}
+}
+$('rcalc').onclick=calcRoom;
+['rx','ry','rh','rrate','ru'].forEach(id=>$(id).addEventListener('input',calcRoom));
+
+let mode='skirting';
+const modes={
+ skirting:['Skirting','Running length','Height','Running length × height','sq ft'],
+ wardrobe:['Wardrobe','Width / length','Height','Width × height','sq ft'],
+ platform:['Kitchen Platform','Running length','Depth','Running length × depth','sq ft'],
+ ceiling:['False Ceiling','Length','Width','Length × width','sq ft'],
+ panel:['Wall / Panel','Width / length','Height','Width × height','sq ft']
+};
+document.querySelectorAll('[data-smart]').forEach(b=>b.onclick=()=>{mode=b.dataset.smart;let m=modes[mode];$('smartName').innerHTML='<b>'+m[0]+'</b> — '+m[3];$('sl1').textContent=m[1];$('sl2').textContent=m[2];$('so').textContent='—';$('ss').textContent='Enter measurements and tap Calculate';});
+$('scalc').onclick=()=>{
+ let x=parseFloat($('sx').value),y=parseFloat($('sy').value),w=parseFloat($('sw').value)||0;if(!Number.isFinite(x)||!Number.isFinite(y))return toast('Enter both measurements');
+ let unit=$('su').value, xf=x*(unit==='ft'?1:unit==='m'?3.280839895:.03280839895),yf=y*(unit==='ft'?1:unit==='m'?3.280839895:.03280839895);
+ let base=xf*yf,final=base*(1+w/100),rate=parseFloat($('srate').value);$('so').textContent=fmt(final)+' sq ft';$('ss').textContent=modes[mode][0]+' estimate';$('sbase').textContent=fmt(base)+' sq ft';$('sfinal').textContent=fmt(final)+' sq ft';if(Number.isFinite(rate)&&rate>=0){$('scost').textContent='₹'+fmt(final*rate);$('srateout').textContent='₹'+fmt(rate)+'/sq.ft'}else{$('scost').textContent='—';$('srateout').textContent='—'}
+};
+
+try{
+ const last=JSON.parse(localStorage.getItem('ism_last')||'{}');
+ if(last.v){$('cv').value=last.v;$('cf').value=last.f||'cm';$('ct').value=last.t||'ft';convert()}
+ $('cv').addEventListener('input',()=>localStorage.setItem('ism_last',JSON.stringify({v:$('cv').value,f:$('cf').value,t:$('ct').value})));
+}catch(e){}
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+
+function labourCalc(){
+ const x=parseFloat($('lx').value),y=parseFloat($('ly').value),rate=parseFloat($('lr').value),w=Math.max(0,parseFloat($('lw').value)||0);
+ if(!Number.isFinite(x)||!Number.isFinite(y)||!Number.isFinite(rate)||x<0||y<0||rate<0){
+   $('lout').textContent='₹ —';$('lsub').textContent='Enter valid length, width and labour rate';return;
+ }
+ const factor=areaFactor($('lu').value),base=x*y*factor,bill=base*(1+w/100),total=bill*rate;
+ $('lout').textContent='₹ '+fmt(total);
+ $('lsub').textContent=fmt(bill)+' sq.ft × ₹'+fmt(rate)+'/sq.ft';
+ $('lbase').textContent=fmt(base)+' sq.ft';
+ $('lfinal').textContent=fmt(bill)+' sq.ft';
+ $('lrate').textContent='₹'+fmt(rate)+'/sq.ft';
+ $('lformula').textContent='₹'+fmt(total);
+}
+$('lcalc').onclick=labourCalc;
+['lx','ly','lr','lw','lu'].forEach(id=>$(id).addEventListener('input',labourCalc));
+document.querySelectorAll('[data-lrate]').forEach(b=>b.onclick=()=>{$('lr').value=b.dataset.lrate;labourCalc()});
+$('srate').addEventListener('input',()=>{if($('sx').value&&$('sy').value) $('scalc').click()});
+</script>
+</body>
+</html>
